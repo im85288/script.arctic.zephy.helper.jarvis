@@ -13,7 +13,7 @@ from operator import itemgetter
 win = xbmcgui.Window( 10000 )
 addon = xbmcaddon.Addon(id='script.arctic.zephyr.helper.jarvis')
 addondir = xbmc.translatePath(addon.getAddonInfo('profile'))
-colorsPath = xbmc.translatePath( 'special://home/addons/sscript.arctic.zephyr.helper.jarvis/resources/colors/' ).decode("utf-8")
+colorsPath = xbmc.translatePath( 'special://home/addons/script.arctic.zephyr.helper.jarvis/resources/colors/' ).decode("utf-8")
 
 #PIL fails on Android devices ?
 hasPilModule = True
@@ -69,7 +69,7 @@ class ColorPicker(xbmcgui.WindowXMLDialog):
         
         #get all colors from the colors xml file and fill a list with tuples to sort later on
         allColors = []
-        colors_file = xbmc.translatePath( 'special://home/addons/script.arctic.zephyr.helper/resources/colors/colors.xml' ).decode("utf-8")
+        colors_file = xbmc.translatePath( 'special://home/addons/script.arctic.zephyr.helper.jarvis/resources/colors/colors.xml' ).decode("utf-8")
         if xbmcvfs.exists( colors_file ):
             doc = parse( colors_file )
             listing = doc.documentElement.getElementsByTagName( 'color' )
