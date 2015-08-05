@@ -48,6 +48,7 @@ class LibraryMonitor(threading.Thread):
     def run(self):
 
         lastListItemLabel = None
+        self.previousitem = ""
 
         while (xbmc.abortRequested == False and self.exit != True):
             # monitor listitem props when videolibrary is active
@@ -69,6 +70,12 @@ class LibraryMonitor(threading.Thread):
   
                 else:
                     xbmc.sleep(50)
+            elif xbmc.getCondVisibility("Window.IsActive(home)"):
+                self.selecteditem = xbmc.getInfoLabel("Container(301).ListItem.Property(dbid)")
+                if (self.selecteditem != self.previousitem):
+                    self.previousitem = self.selecteditem
+                    if xbmc.getInfoLabel("Container(301).ListItem.Property(dbid)") > -1:
+                        self.setHomeStudioLogoLabel()
             else:
                 xbmc.sleep(1000)
                 self.delayedTaskInterval += 1
@@ -84,6 +91,17 @@ class LibraryMonitor(threading.Thread):
             self.win.setProperty("ListItemStudioLabel", studio)
         else:
             self.win.clearProperty("ListItemStudioLabel")
+
+    def setHomeStudioLogoLabel(self):
+        studio = xbmc.getInfoLabel('Container(301).ListItem.Studio')
+        #find logo if multiple found
+        if "/" in studio:
+            studio = studio.split(" / ")[0]
+
+        if studio:
+            self.win.setProperty("HomeStudioLabel", studio)
+        else:
+            self.win.clearProperty("HomeStudioLabel")
                                 
     def checkExtraFanArt(self):
         
