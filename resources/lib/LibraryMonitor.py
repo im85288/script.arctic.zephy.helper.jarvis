@@ -67,18 +67,16 @@ class LibraryMonitor(threading.Thread):
                         self.setStudioLogoLabel()
                     except Exception as e:
                         utils.logMsg("Error", "ERROR in LibraryMonitor ! --> " + str(e), 0)
-  
-                else:
-                    xbmc.sleep(50)
+
             elif xbmc.getCondVisibility("Window.IsActive(home)"):
                 self.selecteditem = xbmc.getInfoLabel("Container(301).ListItem.Property(dbid)")
                 if (self.selecteditem != self.previousitem):
                     self.previousitem = self.selecteditem
                     if xbmc.getInfoLabel("Container(301).ListItem.Property(dbid)") > -1:
                         self.setHomeStudioLogoLabel()
-            else:
-                xbmc.sleep(1000)
-                self.delayedTaskInterval += 1
+
+            xbmc.sleep(150)
+            self.delayedTaskInterval += 0.15
 
     def setStudioLogoLabel(self):
         studio = xbmc.getInfoLabel('ListItem.Studio')
