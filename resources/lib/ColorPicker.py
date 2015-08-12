@@ -24,17 +24,18 @@ except:
 
 class ColorPicker(xbmcgui.WindowXMLDialog):
 
-    manualEdit = None
     colorsList = None
     skinString = None
+    colorsPath = None
     
     def __init__(self, *args, **kwargs):
         xbmcgui.WindowXMLDialog.__init__(self, *args, **kwargs)
-        
+        self.colorsPath = xbmc.translatePath( 'special://home/addons/script.arctic.zephyr.helper.jarvis/resources/colors/' ).decode("utf-8")
+
     def addColorToList(self, colorname, colorstring):
-        
-        colorImageFile = os.path.join(colorsPath,colorstring + ".png")
-        
+
+        colorImageFile = os.path.join(self.colorsPath,colorstring + ".png")
+
         if not xbmcvfs.exists(colorImageFile) and hasPilModule:
             colorstring = colorstring.strip()
             if colorstring[0] == '#': colorstring = colorstring[1:]
@@ -47,26 +48,24 @@ class ColorPicker(xbmcgui.WindowXMLDialog):
             im.save(colorImageFile)
         elif not xbmcvfs.exists(colorImageFile) and not hasPilModule:
             return
-        
+
         listitem = xbmcgui.ListItem(label=colorname, iconImage=colorImageFile)
         listitem.setProperty("colorstring",colorstring)
         self.colorsList.addItem(listitem)
-        
-    
-    
+
     def onInit(self):
         self.action_exitkeys_id = [10, 13]
 
-        if not xbmcvfs.exists(colorsPath):
-            xbmcvfs.mkdir(colorsPath)
-        
+        if not xbmcvfs.exists(self.colorsPath):
+            xbmcvfs.mkdir(self.colorsPath)
+
         self.colorsList = self.getControl(3110)
-        self.manualEdit = self.getControl(3010)
-        
+        self.win = xbmcgui.Window( 10000 )
+
         #get current color that is stored in the skin setting
         currentColor = xbmc.getInfoLabel("Skin.String(" + self.skinString + ')')
         selectItem = 0
-        
+
         #get all colors from the colors xml file and fill a list with tuples to sort later on
         allColors = []
         colors_file = xbmc.translatePath( 'special://home/addons/script.arctic.zephyr.helper.jarvis/resources/colors/colors.xml' ).decode("utf-8")
@@ -78,11 +77,11 @@ class ColorPicker(xbmcgui.WindowXMLDialog):
                 colorstring = color.childNodes [ 0 ].nodeValue.lower()
                 sortstring = colorstring[-6:]
                 allColors.append((name,colorstring,sortstring))
-                
+
         #sort list and fill the panel
         count = 0
         allColors = sorted(allColors,key=itemgetter(2))
-        
+
         for color in allColors:
             self.addColorToList(color[0], color[1])
             if (currentColor == color[1] or currentColor == color[0]):
@@ -98,41 +97,44 @@ class ColorPicker(xbmcgui.WindowXMLDialog):
         else:
             xbmc.executebuiltin("Control.SetFocus(3010)")
             colorstring = currentColor
-        
-        self.manualEdit.setText(colorstring)
-        
-        
+
+        self.win.setProperty("colorstring",colorstring)
+
 
     def onFocus(self, controlId):
         pass
-        
+
     def onAction(self, action):
 
         ACTION_CANCEL_DIALOG = ( 9, 10, 92, 216, 247, 257, 275, 61467, 61448, )
         ACTION_SHOW_INFO = ( 11, )
         ACTION_SELECT_ITEM = 7
         ACTION_PARENT_DIR = 9
-        
+
         if action.getId() in ACTION_CANCEL_DIALOG:
             self.closeDialog()
         else:
             item =  self.colorsList.getSelectedItem()
             colorstring = item.getProperty("colorstring")
-            self.manualEdit.setText(colorstring)
+            self.win.setProperty("colorstring",colorstring)
 
 
     def closeDialog(self):
         #self.close() ##crashes kodi ?
         xbmc.executebuiltin("Dialog.Close(all,true)")
-        
+
     def onClick(self, controlID):
 
-        if(controlID == 3110):       
+        if(controlID == 3110):
             item = self.colorsList.getSelectedItem()
             colorstring = item.getLabel()
             xbmc.executebuiltin("Skin.SetString(" + self.skinString + ','+ colorstring + ')')
             self.closeDialog()
-        elif(controlID == 3010):       
-            colorstring = self.manualEdit.getText()
+        elif(controlID == 3010):
+            dialog = xbmcgui.Dialog()
+            colorstring = dialog.input("Color", self.win.getProperty("colorstring"), type=xbmcgui.INPUT_ALPHANUM)
             xbmc.executebuiltin("Skin.SetString(" + self.skinString + ','+ colorstring + ')')
+            self.closeDialog()
+        elif(controlID == 3011):
+            xbmc.executebuiltin("Skin.SetString(" + self.skinString + ',"None")')
             self.closeDialog()

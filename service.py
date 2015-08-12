@@ -16,23 +16,24 @@ from LibraryMonitor import LibraryMonitor
 from LibraryMonitor import Kodi_Monitor
 
 class Main:
-    
-    KodiMonitor = Kodi_Monitor()
+
     
     def __init__(self):
-                   
+
+        KodiMonitor = Kodi_Monitor()
+
         #start the extra threads
         libraryMonitor = LibraryMonitor()
         libraryMonitor.start()
-        
-        while not self.KodiMonitor.abortRequested():
-                     
-            if self.KodiMonitor.waitForAbort(1):
-                # Abort was requested while waiting. We should exit
-                xbmc.log('Arctic Zephyr Script --> shutdown requested !')         
+
+        while not (KodiMonitor.abortRequested() or xbmc.abortRequested):
+            xbmc.sleep(150)
         else:
+            # Abort was requested while waiting. We should exit
+            xbmc.log('Arctic Zephyr Script --> shutdown requested !')
             #stop the extra threads
             libraryMonitor.stop()
+
 
 xbmc.log('arctic zephyr helper version %s started' % __addonversion__)
 Main()
